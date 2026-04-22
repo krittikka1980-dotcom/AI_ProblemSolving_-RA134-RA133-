@@ -8,10 +8,8 @@
 
 <!-- LEAVES -->
 <div class="leaves">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span>
 </div>
 
 <h1 class="title">TIC TAC TOE AI</h1>
@@ -22,6 +20,16 @@
 
     <div class="panel">
         <h2 id="status">Your Turn (X)</h2>
+
+        <!-- Algorithm -->
+        <select id="algo">
+            <option value="minimax">Minimax</option>
+            <option value="alphabeta">Alpha-Beta</option>
+        </select>
+
+        <!-- Stats -->
+        <p id="stats">Nodes: 0 | Time: 0 ms</p>
+
         <button onclick="resetGame()">Restart</button>
     </div>
 

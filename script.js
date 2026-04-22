@@ -1,5 +1,6 @@
 let board = ["", "", "", "", "", "", "", "", ""];
 let gameOver = false;
+let nodes = 0;
 
 const boardDiv = document.getElementById("board");
 const status = document.getElementById("status");
@@ -34,10 +35,26 @@ function playerMove(i) {
 }
 
 function aiMove() {
-    let bestMove = minimax(board, "O").index;
+    nodes = 0;
+    let start = performance.now();
+
+    let algo = document.getElementById("algo").value;
+    let bestMove;
+
+    if (algo === "minimax") {
+        bestMove = minimax(board, "O").index;
+    } else {
+        bestMove = alphabeta(board, "O", -Infinity, Infinity).index;
+    }
+
+    let end = performance.now();
+
     board[bestMove] = "O";
     animateCell(bestMove);
     updateGame();
+
+    document.getElementById("stats").innerText =
+        `Nodes: ${nodes} | Time: ${(end - start).toFixed(2)} ms`;
 }
 
 function animateCell(i) {
@@ -74,11 +91,12 @@ function checkWinner() {
     return null;
 }
 
-/* MINIMAX */
 function minimax(newBoard, player) {
-    let empty = newBoard.map((v,i) => v === "" ? i : null).filter(v => v !== null);
+    nodes++;
 
+    let empty = newBoard.map((v,i) => v === "" ? i : null).filter(v => v !== null);
     let winner = checkWinner();
+
     if (winner === "X") return {score: -10};
     if (winner === "O") return {score: 10};
     if (empty.length === 0) return {score: 0};
@@ -119,10 +137,63 @@ function minimax(newBoard, player) {
     return moves[bestMove];
 }
 
+function alphabeta(newBoard, player, alpha, beta) {
+    nodes++;
+
+    let empty = newBoard.map((v,i) => v === "" ? i : null).filter(v => v !== null);
+    let winner = checkWinner();
+
+    if (winner === "X") return {score: -10};
+    if (winner === "O") return {score: 10};
+    if (empty.length === 0) return {score: 0};
+
+    let bestMove;
+
+    if (player === "O") {
+        let maxEval = -Infinity;
+
+        for (let i of empty) {
+            newBoard[i] = "O";
+            let eval = alphabeta(newBoard, "X", alpha, beta).score;
+            newBoard[i] = "";
+
+            if (eval > maxEval) {
+                maxEval = eval;
+                bestMove = i;
+            }
+
+            alpha = Math.max(alpha, eval);
+            if (beta <= alpha) break;
+        }
+
+        return {score: maxEval, index: bestMove};
+
+    } else {
+        let minEval = Infinity;
+
+        for (let i of empty) {
+            newBoard[i] = "X";
+            let eval = alphabeta(newBoard, "O", alpha, beta).score;
+            newBoard[i] = "";
+
+            if (eval < minEval) {
+                minEval = eval;
+                bestMove = i;
+            }
+
+            beta = Math.min(beta, eval);
+            if (beta <= alpha) break;
+        }
+
+        return {score: minEval, index: bestMove};
+    }
+}
+
 function resetGame() {
     board = ["", "", "", "", "", "", "", "", ""];
     gameOver = false;
     status.innerText = "Your Turn (X)";
+    document.getElementById("stats").innerText = "Nodes: 0 | Time: 0 ms";
     createBoard();
 }
 
